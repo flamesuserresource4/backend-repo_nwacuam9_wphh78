@@ -1,48 +1,34 @@
 """
-Database Schemas
+Database Schemas for Lobster Business
 
-Define your MongoDB collection schemas here using Pydantic models.
-These schemas are used for data validation in your application.
-
-Each Pydantic model represents a collection in your database.
-Model name is converted to lowercase for the collection name:
-- User -> "user" collection
-- Product -> "product" collection
-- BlogPost -> "blogs" collection
+Each Pydantic model represents a collection in MongoDB.
+Collection name is the lowercase class name.
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, HttpUrl
+from typing import Optional, Literal
 
-# Example schemas (replace with your own):
-
-class User(BaseModel):
+class Lobsterproduct(BaseModel):
     """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
+    Collection: "lobsterproduct"
+    Represents a lobster item for sale (seed/juvenile, broodstock, consumption).
     """
-    name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
+    name: str = Field(..., description="Product name, e.g., Benih Lobster 2-3 cm")
+    type: Literal["benih", "induk", "konsumsi"] = Field(..., description="Jenis produk")
+    size: Optional[str] = Field(None, description="Ukuran/grade, misal 2-3 cm atau 100-150 gr")
+    price: float = Field(..., ge=0, description="Harga dalam Rupiah")
+    stock: int = Field(0, ge=0, description="Stok tersedia (ekor/kg)")
+    unit: Literal["ekor", "kg"] = Field("ekor", description="Satuan stok/penjualan")
+    description: Optional[str] = Field(None, description="Deskripsi singkat")
+    image_url: Optional[HttpUrl] = Field(None, description="URL foto produk")
 
-class Product(BaseModel):
+class Inquiry(BaseModel):
     """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
+    Collection: "inquiry"
+    Leads/pertanyaan dari pengunjung website.
     """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
-
-# Add your own schemas here:
-# --------------------------------------------------
-
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+    name: str = Field(..., description="Nama pelanggan")
+    phone: str = Field(..., description="Nomor WhatsApp/telepon")
+    email: Optional[str] = Field(None, description="Email (opsional)")
+    message: str = Field(..., description="Pesan atau kebutuhan")
+    source: Optional[str] = Field("website", description="Sumber lead")
